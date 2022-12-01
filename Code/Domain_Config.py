@@ -6,7 +6,7 @@ Reactor = dict(
 )
 
 Retention = dict(
-    time = 1,
+    time = 0.1,
     units = 'm' # Choose units for retention time (d,h,m): d - days; h - hours; m - mins.
 )
 

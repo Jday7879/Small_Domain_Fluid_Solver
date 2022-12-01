@@ -214,10 +214,9 @@ def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_
     residual_position_x = np.linspace(10, nx-10, 10).astype(int) #np.array((int(nx/4),int(nx/2),int(3*nx/4)))
     residual_position_y = np.linspace(ny-10, 10, 10).astype(int) #np.array((int(3*ny/4),int(ny/2),int(ny/4)))
 
-
     print('Time step is {} and steps {}'.format(dt, storage_steps))
-    while (np.max(np.abs(uxs - ux)) > np.max(uxs) * error) and (np.max(np.abs(uys - uy)) > np.max(
-            uys) * error) and t < 3*hrt:  # Finding fluid solution
+    while ((np.max(np.abs(uxs - ux)) > np.max(uxs) * error) and (np.max(np.abs(uys - uy)) > np.max(
+            uys) * error)) or (t < np.min([60*2,hrt])):  # Finding fluid solution
         ii += 1
         ux_max = np.max(ux)
         uy_max = np.max(uy)
@@ -234,8 +233,6 @@ def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_
             resid[pos] = np.mean(np.absolute(uxs - ux)) / np.mean(uxs)
             uxs = ux
             uys = uy
-            if t > 3*hrt:
-                break
 
         for irk in np.arange(4):
             if irk == 0:
