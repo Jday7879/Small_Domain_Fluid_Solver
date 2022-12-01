@@ -76,7 +76,7 @@ def save_velocity(ux,uy):
     np.savetxt(data_folder / file_y, uy, fmt='%.18e', delimiter=',')
 
 nx = 100
-ny = 200
+ny = 100
 Lx = Domain_Config.Reactor['x_length'] # length of x axis in system
 Ly = Domain_Config.Reactor['y_length']
 Lz = Domain_Config.Reactor['z_length']
@@ -111,7 +111,10 @@ system = solver.domain(Lx, Ly, Lz, nx=nx, ny=ny)
 psi, boundary, in_out_points, in_start, out_start = system.influent_effluent_regions(baffle_pairs, baffle_length,
                                                                                     influent_width, psi, boundary, flux)
 
-psi, ux, uy, resid = solver.steady_state(boundary, psi, nx, ny, dx, dy,error=1e-6,dt_min=1e-3)
+psi, ux, uy, resid, t = solver.steady_state(boundary, psi, nx, ny, dx, dy,error=1e-7,dt_min=4e-3)
+
 
 
 plot_streamlines(xx,yy,ux,uy,title='Velocity Streamlines for a HRT of {}'.format(Domain_Config.Retention['time']) + ' ' + Domain_Config.Retention['units'])
+
+plt.show()

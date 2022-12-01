@@ -77,6 +77,16 @@ class domain:
 
 
 def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_interval=10):
+    import Domain_Config as DC
+    hrt = DC.Retention['time']  # /factor # hydraulic retention time
+    if DC.Retention['units'] == 'd':
+        TC = 24 * 60 * 60
+    elif DC.Retention['units'] == 'h':
+        TC = 60 * 60
+    elif DC.Retention['units'] == 'm':
+        TC = 60
+    hrt *= TC
+
     start_time = time.time()
     nxy = nx * ny
     nxy_one = (nx + 1) * (ny + 1)
@@ -206,8 +216,8 @@ def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_
 
 
     print('Time step is {} and steps {}'.format(dt, storage_steps))
-    while np.max(np.abs(uxs - ux)) > np.max(uxs) * error and np.max(np.abs(uys - uy)) > np.max(
-            uys) * error:  # Finding fluid solution
+    while (np.max(np.abs(uxs - ux)) > np.max(uxs) * error) and (np.max(np.abs(uys - uy)) > np.max(
+            uys) * error) and t < 3*hrt:  # Finding fluid solution
         ii += 1
         ux_max = np.max(ux)
         uy_max = np.max(uy)
@@ -215,14 +225,18 @@ def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_
 
         if ii % storage_steps == 0 and ii - temp_value > 10:
             temp_value = ii
-            print('The normalised differences in between the time steps is ', np.max(np.abs(uxs - ux)) / np.max(uxs),
-                  np.max(np.abs(uys - uy)) / np.max(uxs), t, time.time() - start_time_solver)
-            print(uxs[residual_position_x,residual_position_y] - ux[residual_position_x,residual_position_y])
-            print(uys[residual_position_x, residual_position_y] - uy[residual_position_x, residual_position_y])
+            print('Normalised differences between time-steps: {:.2} , {:.2} With simulaton time of {:.2f} and real time {:.2f} '.format(np.max(np.abs(uxs - ux)) / np.max(uxs),
+                  np.max(np.abs(uys - uy)) / np.max(uxs), t, time.time() - start_time_solver))
+            print('Maximum Velocity {:.2}'.format(np.max([np.max(ux), np.max(uy)])))
+            #print(uxs[residual_position_x,residual_position_y] - ux[residual_position_x,residual_position_y])
+            #print(uys[residual_position_x, residual_position_y] - uy[residual_position_x, residual_position_y])
             pos += 1
             resid[pos] = np.mean(np.absolute(uxs - ux)) / np.mean(uxs)
             uxs = ux
             uys = uy
+            if t > 3*hrt:
+                break
+
         for irk in np.arange(4):
             if irk == 0:
                 vort1 = vorticity
@@ -272,4 +286,4 @@ def steady_state(boundary, psi, nx, ny, dx, dy, error=1e-8, dt_min=1e2, storage_
     print(uxs[residual_position_x, residual_position_y] - ux[residual_position_x, residual_position_y])
     print(uys[residual_position_x, residual_position_y] - uy[residual_position_x, residual_position_y])
 
-    return psi, ux, uy, resid
+    return psi, ux, uy, resid, t

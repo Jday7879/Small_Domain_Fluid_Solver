@@ -2,7 +2,7 @@ Reactor = dict(
     x_length = 78e-3,
     y_length = 20e-3, # Influent is placed on the y axis
     z_length = 9e-3,
-    influent_width = 3e-3 # Note influent width must be smaller than y
+    influent_width = 4e-3 # Note influent width must be smaller than y
 )
 
 Retention = dict(
